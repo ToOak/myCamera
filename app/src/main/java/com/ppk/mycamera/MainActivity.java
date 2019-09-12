@@ -1,14 +1,8 @@
 package com.ppk.mycamera;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import android.graphics.Camera;
 import android.os.Bundle;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 
 public class MainActivity extends AppCompatActivity {
 

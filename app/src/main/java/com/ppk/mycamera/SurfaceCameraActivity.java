@@ -4,19 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Display;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.ppk.mycamera.utils.CameraManage;
-import com.ppk.mycamera.utils.CameraThreadPool;
-
-import java.io.IOException;
-import java.util.List;
+import com.ppk.mycamera.camera.CameraManage;
+import com.ppk.mycamera.utils.LogUtil;
 
 public class SurfaceCameraActivity extends Activity implements SurfaceHolder.Callback {
 
@@ -43,7 +37,7 @@ public class SurfaceCameraActivity extends Activity implements SurfaceHolder.Cal
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.e("oak", "surfaceCreated");
+        LogUtil.e("surfaceCreated");
         if (cameraManage.getCamera() == null) {
             cameraManage.initCamera(holder);
         } else {
@@ -53,14 +47,14 @@ public class SurfaceCameraActivity extends Activity implements SurfaceHolder.Cal
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        Log.e("oak", "surfaceChanged");
+        LogUtil.e("surfaceChanged");
 //        cameraManage.refreshCamera(this.holder);
         cameraManage.setCameraOrientationAndSize(surfaceView, width, height);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.e("oak", "surfaceDestroyed");
+        LogUtil.e("surfaceDestroyed");
 //        holder.removeCallback(this);
 //        cameraManage.releaseCamera();
         cameraManage.stopCamera();

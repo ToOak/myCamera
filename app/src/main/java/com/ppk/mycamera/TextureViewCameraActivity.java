@@ -5,12 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.TextureView;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.ppk.mycamera.utils.CameraManage;
+import com.ppk.mycamera.camera.CameraManage;
+import com.ppk.mycamera.utils.LogUtil;
 
 public class TextureViewCameraActivity extends Activity implements TextureView.SurfaceTextureListener {
 
@@ -36,7 +36,7 @@ public class TextureViewCameraActivity extends Activity implements TextureView.S
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Log.e("oak", "onSurfaceTextureAvailable");
+        LogUtil.e("onSurfaceTextureAvailable");
         surfaceTexture = surface;
         cameraManage.initCamera(surfaceTexture);
         cameraManage.setCameraOrientationAndSize(textureView, width, height);
@@ -44,13 +44,13 @@ public class TextureViewCameraActivity extends Activity implements TextureView.S
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-        Log.e("oak", "onSurfaceTextureSizeChanged");
+        LogUtil.e("onSurfaceTextureSizeChanged");
         cameraManage.setCameraOrientationAndSize(textureView, width, height);
     }
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        Log.e("oak", "onSurfaceTextureDestroyed");
+        LogUtil.e("onSurfaceTextureDestroyed");
         surface.release();
         cameraManage.releaseCamera();
         return false;
@@ -58,7 +58,7 @@ public class TextureViewCameraActivity extends Activity implements TextureView.S
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-        Log.e("oak", "onSurfaceTextureUpdated");
+        LogUtil.e("onSurfaceTextureUpdated");
     }
 
     @Override

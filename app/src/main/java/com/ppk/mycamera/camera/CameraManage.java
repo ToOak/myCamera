@@ -1,10 +1,10 @@
-package com.ppk.mycamera.utils;
+package com.ppk.mycamera.camera;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -12,8 +12,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import com.ppk.mycamera.utils.LogUtil;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
+
+import rx.Observable;
+import rx.Scheduler;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+
+import static com.ppk.mycamera.MyApplication.dateFormat;
+import static com.ppk.mycamera.MyApplication.startTime;
+import static com.ppk.mycamera.utils.BitmapUtil.decodeToBitMap;
+import static com.ppk.mycamera.utils.BitmapUtil.renderRGBBitmap;
+import static com.ppk.mycamera.utils.BitmapUtil.rotateYUVDegree90;
+import static com.ppk.mycamera.utils.BitmapUtil.saveBitmap;
 
 public class CameraManage {
     private Camera camera;
@@ -34,7 +53,7 @@ public class CameraManage {
                 camera.setPreviewTexture(surfaceTexture);
                 initCamera();
             } catch (IOException e) {
-                Log.e("oak", "preview display exception: " + e.getMessage());
+                LogUtil.e("preview display exception: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -47,7 +66,7 @@ public class CameraManage {
                 camera.setPreviewDisplay(surfaceHolder);
                 initCamera();
             } catch (IOException e) {
-                Log.e("oak", "preview display exception: " + e.getMessage());
+                LogUtil.e("preview display exception: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -70,7 +89,7 @@ public class CameraManage {
                                 }
                             });
                         } catch (Throwable e) {
-                            Log.e("oak", "createAutoFocusTimerTask throwable: " + e.getMessage());
+                            LogUtil.e("createAutoFocusTimerTask throwable: " + e.getMessage());
                             // startPreview是异步实现，可能在某些机器上前几次调用会autofocus failß
                         }
                     }
@@ -79,7 +98,7 @@ public class CameraManage {
         });
         camera.setPreviewCallback(new Camera.PreviewCallback() {
             @Override
-            public void onPreviewFrame(byte[] data, Camera camera) {
+            public void onPreviewFrame(final byte[] data, Camera camera) {
 //                        try {
 //                            Thread.sleep(1000);
 //                            Log.e("oak", "current thread: " + Thread.currentThread().getName());
@@ -87,9 +106,27 @@ public class CameraManage {
 //                            e.printStackTrace();
 //                        }
 //                        camera.autoFocus(null);
-                Log.e("oak", "onPreViewFrame: "
-                        + camera.getParameters().getPreviewSize().width + " "
-                        + camera.getParameters().getPreviewSize().height);
+                final int width = camera.getParameters().getPreviewSize().width;
+                final int height = camera.getParameters().getPreviewSize().height;
+                LogUtil.e("onPreViewFrame: " + width + " " + height);
+
+                Observable.just(data).map(new Func1<byte[], Boolean>() {
+                    @Override
+                    public Boolean call(byte[] bytes) {
+                        LogUtil.e("current thread: " + Thread.currentThread().getName());
+                        byte[] rotateBytes = rotateYUVDegree90(data, width, height);
+                        Bitmap bitmap = decodeToBitMap(rotateBytes, height, width);
+                        saveBitmap(bitmap, new File(activity.getExternalCacheDir(), dateFormat.format(new Date()) + "_pic.jpg"));
+                        return true;
+                    }
+                }).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action1<Boolean>() {
+                            @Override
+                            public void call(Boolean aBoolean) {
+                                LogUtil.e("current thread: " + Thread.currentThread().getName());
+                            }
+                        });
             }
         });
     }
@@ -103,8 +140,15 @@ public class CameraManage {
         List<Camera.Size> supportedPreviewSizes = camera.getParameters().getSupportedPreviewSizes();
         Camera.Size optimalPreviewSize = getOptimalPreviewSize(supportedPreviewSizes, width, height);
         camera.getParameters().setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
-
+        LogUtil.e("setCameraOrientationAndSize: "
+                + view.getLeft() + " " + view.getTop()
+                + " " + view.getRight() + " " + view.getBottom()
+        );
         adjustDisplayRatio(view, displayOrientation);
+        LogUtil.e("setCameraOrientationAndSize: "
+                + view.getLeft() + " " + view.getTop()
+                + " " + view.getRight() + " " + view.getBottom()
+        );
 //        camera.getParameters().setPictureSize(
 //                1280, 720
 //        );
@@ -137,7 +181,7 @@ public class CameraManage {
                                     }
                                 });
                             } catch (Throwable e) {
-                                Log.e("oak", "createAutoFocusTimerTask throwable: " + e.getMessage());
+                                LogUtil.e("createAutoFocusTimerTask throwable: " + e.getMessage());
                                 // startPreview是异步实现，可能在某些机器上前几次调用会autofocus failß
                             }
                         }
@@ -145,7 +189,7 @@ public class CameraManage {
                 }
             });
         } catch (IOException e) {
-            Log.e("oak", "rePreview display exception: " + e.getMessage());
+            LogUtil.e("rePreview display exception: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -169,7 +213,7 @@ public class CameraManage {
                                     }
                                 });
                             } catch (Throwable e) {
-                                Log.e("oak", "createAutoFocusTimerTask throwable: " + e.getMessage());
+                                LogUtil.e("createAutoFocusTimerTask throwable: " + e.getMessage());
                                 // startPreview是异步实现，可能在某些机器上前几次调用会autofocus failß
                             }
                         }
@@ -177,7 +221,7 @@ public class CameraManage {
                 }
             });
         } catch (IOException e) {
-            Log.e("oak", "rePreview display exception: " + e.getMessage());
+            LogUtil.e("rePreview display exception: " + e.getMessage());
             e.printStackTrace();
         }
     }

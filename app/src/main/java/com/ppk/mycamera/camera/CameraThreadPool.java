@@ -1,4 +1,4 @@
-package com.ppk.mycamera.utils;
+package com.ppk.mycamera.camera;
 
 import java.util.Timer;
 import java.util.TimerTask;
