@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MyCamera</string>
+    <string name="title_activity_surface_camera">SurfaceCameraActivity</string>
+</resources>
