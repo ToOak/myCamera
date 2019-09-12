@@ -55,7 +55,7 @@ public class SurfaceCameraActivity extends Activity implements SurfaceHolder.Cal
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         Log.e("oak", "surfaceChanged");
 //        cameraManage.refreshCamera(this.holder);
-        cameraManage.setCameraOrientationAndSize(width, height);
+        cameraManage.setCameraOrientationAndSize(surfaceView, width, height);
     }
 
     @Override

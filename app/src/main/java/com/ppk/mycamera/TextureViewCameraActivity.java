@@ -39,13 +39,13 @@ public class TextureViewCameraActivity extends Activity implements TextureView.S
         Log.e("oak", "onSurfaceTextureAvailable");
         surfaceTexture = surface;
         cameraManage.initCamera(surfaceTexture);
-        cameraManage.setCameraOrientationAndSize(width, height);
+        cameraManage.setCameraOrientationAndSize(textureView, width, height);
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
         Log.e("oak", "onSurfaceTextureSizeChanged");
-        cameraManage.setCameraOrientationAndSize(width, height);
+        cameraManage.setCameraOrientationAndSize(textureView, width, height);
     }
 
     @Override

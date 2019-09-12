@@ -1,12 +1,15 @@
 package com.ppk.mycamera.utils;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceHolder;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import java.io.IOException;
@@ -51,7 +54,7 @@ public class CameraManage {
     }
 
     private void initCamera() {
-        if (camera == null){
+        if (camera == null) {
             return;
         }
         camera.startPreview();
@@ -91,8 +94,8 @@ public class CameraManage {
         });
     }
 
-    public void setCameraOrientationAndSize(int width, int height) {
-        if (camera == null){
+    public void setCameraOrientationAndSize(View view, int width, int height) {
+        if (camera == null) {
             return;
         }
         int displayOrientation = getDisplayOrientation();
@@ -100,6 +103,8 @@ public class CameraManage {
         List<Camera.Size> supportedPreviewSizes = camera.getParameters().getSupportedPreviewSizes();
         Camera.Size optimalPreviewSize = getOptimalPreviewSize(supportedPreviewSizes, width, height);
         camera.getParameters().setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
+
+        adjustDisplayRatio(view, displayOrientation);
 //        camera.getParameters().setPictureSize(
 //                1280, 720
 //        );
@@ -266,5 +271,52 @@ public class CameraManage {
         return result;
     }
 
+    /**
+     * 预览图片拉伸处理
+     *
+     * @param rotation
+     */
+    private void adjustDisplayRatio(View view, int rotation) {
+        if (camera == null) {
+            return;
+        }
+        ViewGroup parent = ((ViewGroup) view.getParent());
+        Rect rect = new Rect();
+        parent.getLocalVisibleRect(rect);
+        int width = rect.width();
+        int height = rect.height();
+        Camera.Size previewSize = camera.getParameters().getPreviewSize();
+        int previewWidth;
+        int previewHeight;
+        if (rotation == 90 || rotation == 270) {
+            previewWidth = previewSize.height;
+            previewHeight = previewSize.width;
+        } else {
+            previewWidth = previewSize.width;
+            previewHeight = previewSize.height;
+        }
+
+//        https://www.polarxiong.com/archives/Android%E7%9B%B8%E6%9C%BA%E5%BC%80%E5%8F%91-%E5%9B%9B-%E6%97%8B%E8%BD%AC%E4%B8%8E%E7%BA%B5%E6%A8%AA%E6%AF%94.html
+        // if camera's preview ratio of height and width is more than parent's layout container's, so that make parents's height
+        // assign to camera preview's height, and make preview's width convert into: newHeight * width / oldHeight. Vice versa.
+        // From (width / height) < (previewWidth / previewHeight)
+//        if (CameraConfig.getInstance().getmCameraType() == CameraConfig.RK3288_LAMP) {
+//            //适配特殊的设备 1080*810 显示区域
+//            int surePreHeight = 1200;
+//            final int scaledChildWidth = surePreHeight * previewWidth / previewHeight;
+//            layout((width - scaledChildWidth)/2, (height - 1200) / 2, (scaledChildWidth + width) / 2, (height + 1200) / 2);
+////            layout(0, (height - surePreHeight) / 2 + deviation, scaledChildWidth, (height + surePreHeight) / 2 + deviation);
+//
+//        } else {
+        if (width * previewHeight < height * previewWidth) {
+            // align center-vertical of parent's container
+            final int scaledChildWidth = previewWidth * height / previewHeight;
+            view.layout((width - scaledChildWidth) / 2, 0, (width + scaledChildWidth) / 2, height);
+        } else {
+            final int scaledChildHeight = previewHeight * width / previewWidth;
+            view.layout(0, (height - scaledChildHeight) / 2, width, (height + scaledChildHeight) / 2);
+        }
+//        }
+    }
 
 }
