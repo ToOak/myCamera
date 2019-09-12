@@ -51,6 +51,9 @@ public class CameraManage {
     }
 
     private void initCamera() {
+        if (camera == null){
+            return;
+        }
         camera.startPreview();
         CameraThreadPool.createAutoFocusTimerTask(new Runnable() {
             @Override
@@ -89,11 +92,17 @@ public class CameraManage {
     }
 
     public void setCameraOrientationAndSize(int width, int height) {
+        if (camera == null){
+            return;
+        }
         int displayOrientation = getDisplayOrientation();
         camera.setDisplayOrientation(displayOrientation);
         List<Camera.Size> supportedPreviewSizes = camera.getParameters().getSupportedPreviewSizes();
         Camera.Size optimalPreviewSize = getOptimalPreviewSize(supportedPreviewSizes, width, height);
         camera.getParameters().setPictureSize(optimalPreviewSize.width, optimalPreviewSize.height);
+//        camera.getParameters().setPictureSize(
+//                1280, 720
+//        );
     }
 
     public void stopCamera() {
