@@ -238,6 +238,7 @@ public class CameraManage {
     }
 
     private Camera openCamera() {
+//        return Camera.open(1);
         return Camera.open();
     }
 
